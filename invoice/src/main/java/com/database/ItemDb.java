@@ -1,11 +1,9 @@
 package com.database;
 
-import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -17,8 +15,8 @@ public class ItemDb {
 		intializeQueryMap();
 	}
 	private static void intializeQueryMap() {
-		String selectAllQuery = "Select * from ItemTable";
-		String selectQuery = "Select * from ItemTable where itemId = ?";
+		String selectAllQuery = "Select itemName, itemId, description, price from ItemTable";
+		String selectQuery = "Select itemName, itemId, description, price from ItemTable where itemId = ?";
 		String updateQuery = "Update ItemTable set itemName = ?, description = ?, price = ? "
 				+ "where itemId = ?";
 		String createQuery = "Insert into ItemTable (itemId , itemName, description, price) "
@@ -129,10 +127,18 @@ public class ItemDb {
 		return false;
 	}
 
-	public static List<Item> getItems() {
+	public static List<Item> getItems(String criteria, String orderBy) {
 		String query = queryMap.get("SelectAllQuery");
+
+		if (!criteria.isEmpty()) {
+			query += " where " + criteria;
+		}
+		if (!orderBy.isEmpty()) {
+			query += orderBy;
+		}
 		List<Item> itemList = new ArrayList<Item>();
 		try {
+			System.out.println("Query " + query);
 			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query);
 			ResultSet rs = pst.executeQuery();
 			while(rs.next()) {

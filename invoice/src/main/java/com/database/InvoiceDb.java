@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,13 +18,13 @@ public class InvoiceDb {
 		intializeQueryMap();
 	}
 	private static void intializeQueryMap() {
-		String selectQuery = "Select * from InvoiceTable "
+		String selectQuery = "Select InvoiceTable.contactId, InvoiceTable.invoiceId,  InvoiceTable.total,  InvoiceTable.status, ItemTable.itemId, ItemTable.itemName, LineItemTable.rate, LineItemTable.quantity, LineItemTable.amount, LineItemTable.lineItemId from InvoiceTable "
 				+ "join Contacttable on InvoiceTable.contactId = Contacttable.contactId "
 				+ "join LineItemTable on Invoicetable.invoiceId = LineItemTable.invoiceId "
 				+ "join ItemTable on LineItemTable.itemId = ItemTable.itemId "
 				+ "where InvoiceTable.invoiceId = ?";
 		
-		String selectAllQuery = "Select * from InvoiceTable "
+		String selectAllQuery = "Select InvoiceTable.contactId, InvoiceTable.invoiceId,  InvoiceTable.total,  InvoiceTable.status, ItemTable.itemId, ItemTable.itemName, LineItemTable.rate, LineItemTable.quantity, LineItemTable.amount, LineItemTable.lineItemId from InvoiceTable "
 				+ "join Contacttable on InvoiceTable.contactId = Contacttable.contactId "
 				+ "join LineItemTable on Invoicetable.invoiceId = LineItemTable.invoiceId "
 				+ "join ItemTable on LineItemTable.itemId = ItemTable.itemId ";
@@ -43,25 +44,31 @@ public class InvoiceDb {
 		queryMap.put("ChangeStatusQuery", updateInvoiceStatus);
 	}
 	
-	public static List<Invoice> getInvoices() {
+	public static List<Invoice> getInvoices(String criteria, String orderBy) {
 		System.out.println("getInvoices called");
 		String query = queryMap.get("SelectAllQuery");
+		if (!criteria.isEmpty()) {
+			query += " where " + criteria;
+		}
+		if (!orderBy.isEmpty()) {
+			query += orderBy;
+		}
+		List<Invoice> invoiceList = new ArrayList<Invoice>();
 		try {
 			System.out.println(query);
 			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query);
 			ResultSet rs = pst.executeQuery();
-			List<Invoice> invoiceList = getInvoiceList(rs);
-			return invoiceList;
+			invoiceList = getInvoiceList(rs);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		return null;
+
+		return invoiceList;
 	}
 
 	public static List<Invoice> getInvoiceList(ResultSet rs) {
-		HashMap<Integer, Invoice> invoicesMap = new HashMap<Integer, Invoice>();
+		LinkedHashMap<Integer, Invoice> invoicesMap = new LinkedHashMap<Integer, Invoice>();
 		System.out.println("getInvoiceList rs called");
 		try {
 			while(rs.next()) {
@@ -72,6 +79,7 @@ public class InvoiceDb {
 					invoice = new Invoice();
 					invoicesMap.put(rs.getInt("invoiceId"), invoice);
 					invoice.setInvoiceId(rs.getInt("invoiceId"));
+					System.out.println("invoice id " + invoice.getInvoiceId());
 					invoice.setContactId(rs.getInt("contactId"));
 					invoice.setTotalAmount(rs.getInt("total"));
 					invoice.setStatus(rs.getString("status"));

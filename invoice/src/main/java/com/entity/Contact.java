@@ -1,5 +1,11 @@
 package com.entity;
 
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -11,10 +17,31 @@ public class Contact {
 	private int contactId;
 	private String name;
 	private String email;
+	private static Map<String, String> allowedFilterMap = new HashMap<String, String>();
+	private static Map<String, String> allowedSortMap = new HashMap<String, String>();
+	private static List<String> allowedParameters = new ArrayList<String>();
 	private static int idIndex = 1;
 	
 	public static String responseKey = "contacts";
-	
+
+	static {
+		initializeStatics();
+	}
+
+	private static void initializeStatics()
+	{
+		allowedParameters.add("sort");
+		allowedParameters.add("sort_order");
+		allowedParameters.add("search_text");
+
+		allowedFilterMap.put("contact_id", "contactId");
+		allowedFilterMap.put("name", "name");
+
+		allowedSortMap.put("contact_id", "contactId");
+		allowedSortMap.put("email", "email");
+		allowedSortMap.put("name", "name");
+	}
+
 	@XmlElement(name = "contact_id")
 	public int getContactId() {
 		return contactId;
@@ -37,5 +64,18 @@ public class Contact {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
+
+	public static Map<String, String> getAllowedFilterMap()
+	{
+		return allowedFilterMap;
+	}
+
+	public static Map<String, String> getAllowedSortMap()
+	{
+		return allowedSortMap;
+	}
+
+	public static List<String> getAllowedParameters() {
+		return allowedParameters;
+	}
 }

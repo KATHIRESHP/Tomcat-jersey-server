@@ -9,9 +9,10 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
+import javax.ws.rs.core.UriInfo;
 
 import com.database.ContactDb;
 import com.database.InvoiceDb;
@@ -24,9 +25,8 @@ public class ContactResource {
 	
 	@GET 
     @Produces(MediaType.APPLICATION_JSON)
-	public Response getContacts() {
-		List<Contact> contactsList = ContactDb.getContacts();
-		return ResponseUtil.generateResponse(200, "contacts retrival successfull", Contact.responseKey, contactsList);
+	public Response getContacts(@Context UriInfo uriInfo) {
+		return ContactUtil.getContacts(uriInfo);
 	}
 	
 	@GET

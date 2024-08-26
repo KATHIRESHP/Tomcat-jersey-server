@@ -13,10 +13,18 @@ import com.entity.Invoice;
 public class ContactDb {
 	
 
-	public static List<Contact> getContacts() {
-		String query = "Select * from ContactTable";
+	public static List<Contact> getContacts(String criteria, String orderBy) {
+		String query = "Select email, name, contactId from ContactTable";
+
+		if (!criteria.isEmpty()) {
+			query += " where " + criteria;
+		}
+		if (!orderBy.isEmpty()) {
+			query += orderBy;
+		}
 		List<Contact> contactsList = new ArrayList<Contact>();
 		try {
+			System.out.println("Query " + query);
 			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query);
 			ResultSet rs = pst.executeQuery();
 			while(rs.next()) {
@@ -34,7 +42,7 @@ public class ContactDb {
 	}
 	
 	public static Contact getContact(int id) {
-		String query = "Select * from ContactTable where contactId = ?";
+		String query = "Select email, name, contactId from ContactTable where contactId = ?";
 		try {
 			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query);
 			pst.setInt(1, id);

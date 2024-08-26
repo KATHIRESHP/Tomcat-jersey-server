@@ -1,11 +1,10 @@
 package com.entity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import com.database.ContactDb;
-import com.database.ItemDb;
-import com.database.LineItemDb;
 import com.google.gson.annotations.SerializedName;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -24,9 +23,32 @@ public class Invoice {
 	private String status;
 	@SerializedName("line_items")
 	private List<InvoiceLineItem> lineItems = new ArrayList<InvoiceLineItem>();
+
+	private static Map<String,String> allowedFilterMap = new HashMap<String, String>();
+	private static Map<String,String> allowedSortMap = new HashMap<String, String>();
+	private static List<String> allowedParameters = new ArrayList<String>();
 	private static int idIndex = 1;
 	public static String responseKey = "invoices";
-	
+
+
+	static {
+		initializeStatics();
+	}
+
+	private static void initializeStatics()
+	{
+		allowedParameters.add("sort");
+		allowedParameters.add("sort_order");
+
+		allowedFilterMap.put("contact_id", "contactId");
+		allowedFilterMap.put("invoice_id", "invoiceId");
+		allowedFilterMap.put("status", "status");
+
+		allowedSortMap.put("contact_id", "contactId");
+		allowedSortMap.put("invoice_id", "invoiceId");
+		allowedSortMap.put("total", "total");
+	}
+
 	@XmlElement(name = "invoice_id")
 	public int getInvoiceId() {
 		return invoiceId;
@@ -75,5 +97,18 @@ public class Invoice {
 			System.out.println("line item id: "+lineItem.getLineItemId() + " invoice id: " + lineItem.getInvoiceid());
 		}
 
+	}
+
+	public static Map<String, String> getAllowedFilterMap()
+	{
+		return allowedFilterMap;
+	}
+
+	public static Map<String, String> getAllowedSortMap()
+	{
+		return allowedSortMap;
+	}
+	public static List<String> getAllowedParameters() {
+		return allowedParameters;
 	}
 }
