@@ -39,7 +39,6 @@ public class InvoiceResource {
 	 * @return String that will be send back as a response of type "text/plain".
 	 */
 	
-	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getInvoices(@Context UriInfo uriInfo) {
@@ -59,7 +58,6 @@ public class InvoiceResource {
 		}
 		return ResponseUtil.generateResponse(404, "Invoice not found");
 	}
-
 	
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)

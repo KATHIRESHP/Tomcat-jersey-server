@@ -41,11 +41,11 @@ public class InvoiceUtil {
 			Contact contact = ContactDb.getContact(invoice.getContactId());
 			return ResponseUtil.generateResponse(200, "Invoice contact retrival success", Contact.responseKey, contact);
 		}
-		return null;
+		return ResponseUtil.generateResponse(404, "Invoice not found");
 	}
 
 	public static Response addOrEditInvoice(Invoice invoice, int invoiceId) {
-		List<Error> errorList = validateInvoice(invoice);
+		List<Error> errorList = SecurityUtil.validateInvoice(invoice);
 		if (!errorList.isEmpty()) {
 			return ResponseUtil.generateResponse(400, "Invalid data", "error", errorList);
 		}
@@ -72,8 +72,7 @@ public class InvoiceUtil {
 		Map<Integer, InvoiceLineItem> lineItems = new HashMap<Integer, InvoiceLineItem>();
 		int totalAmount = 0;
 		for (InvoiceLineItem lineItem : invoice.getLineItems()) {
-			if (lineItem.getLineItemId() == 0 || invoiceId == 0
-					|| LineItemDb.getInvoiceLineItem(lineItem.getLineItemId(), invoiceId) == null) {
+			if (lineItem.getLineItemId() == 0 || invoiceId == 0 || LineItemDb.getInvoiceLineItem(lineItem.getLineItemId(), invoiceId) == null) {
 				System.out.println("Setting up lineitem id for the line item with id: " + lineItem.getLineItemId());
 				lineItem.setLineItemId();
 			}
@@ -84,82 +83,22 @@ public class InvoiceUtil {
 			lineItems.put(lineItem.getLineItemId(), lineItem);
 			totalAmount += lineItem.getAmount();
 		}
-		invoice.setTotalAmount(totalAmount);
-	}
-
-	public static List<Error> validateInvoice(Invoice invoice) {
-		List<InvoiceLineItem> invoiceLineItems = invoice.getLineItems();
-		ArrayList<Integer> itemIdList = new ArrayList<Integer>();
-		List<Error> errorList = new ArrayList<Error>();
-		if (invoiceLineItems.isEmpty()) {
-			Error error = new Error();
-			error.setCode(400);
-			error.setMessage("Invoice has no line items");
-			errorList.add(error);
-		}
-		if (ContactDb.getContact(invoice.getContactId()) == null) {
-			Error error = new Error();
-			error.setCode(400);
-			error.setMessage("Invoice has associated contact person");
-			errorList.add(error);
-		}
-		for (InvoiceLineItem lineItem : invoiceLineItems) {
-			itemIdList.add(lineItem.getItemId());
-		}
-
-		List<Item> itemList = ItemDb.getItems(itemIdList);
-		List<Integer> dbItemIdList = new ArrayList<Integer>();
-		for (Item item : itemList) {
-			dbItemIdList.add(item.getItemId());
-		}
-
-		for (InvoiceLineItem lineItem : invoiceLineItems) {
-			if (!dbItemIdList.contains(lineItem.getItemId())) {
-				Error error = new Error();
-				error.setCode(400);
-				error.setMessage("Item with id: " + lineItem.getItemId() + " not found");
-				errorList.add(error);
-			}
-		}
-
-		return errorList;
+		invoice.setTotal(totalAmount);
 	}
 
 	public static Response getInvoices(UriInfo uriInfo) {
 		List<Error> errorList = SecurityUtil.validateRequestParams(uriInfo, Invoice.getAllowedParameters(), Invoice.getAllowedFilterMap());
-		String criteria = "";
-		String orderBy = "";
-		
 		MultivaluedMap<String, String> queryParamsMap = uriInfo.getQueryParameters();
-		
-		for (Map.Entry<String, List<String>> entry : queryParamsMap.entrySet()) {
-			String key = entry.getKey();
-			System.out.println("Entry key: " + key + " Criteria: " + criteria);
-			if (Invoice.getAllowedFilterMap().containsKey(key)) {
-				for (String value : entry.getValue()) {
-					criteria = QueryUtil.getCriteria(criteria, "InvoiceTable." + Invoice.getAllowedFilterMap().get(key), value, "and", "=");
-				}
-			}
-		}
-		if (queryParamsMap.containsKey("sort") && queryParamsMap.containsKey("sort_order")) {
-			if (!Invoice.getAllowedSortMap().containsKey(queryParamsMap.get("sort").get(0))) {
-				Error error = new Error();
-				error.setCode(400);
-				error.setMessage("Column " + queryParamsMap.get("sort").get(0) + " was not sortable");
-				errorList.add(error);
-			} else {
-				String sortOrder = queryParamsMap.get("sort_order").get(0);
-				String sortCol = Invoice.getAllowedSortMap().get(queryParamsMap.get("sort").get(0));
-				sortOrder = sortOrder.toUpperCase();
-				if (!sortCol.isEmpty()) {
-					orderBy = " order by InvoiceTable." + sortCol + " " + (sortOrder.equals("D") ? "desc" : "");
-				}
-			}
-		}
+
+		String criteria = QueryUtil.handleParamCriteria(queryParamsMap, Invoice.getAllowedFilterMap(), "InvoiceTable");
+		String orderBy = QueryUtil.handleParamSortOrder(queryParamsMap, Invoice.getAllowedSortMap(), "InvoiceTable", errorList);
+		String pageLimit = QueryUtil.handlePagination(queryParamsMap, errorList);
+
 		if (!errorList.isEmpty()) {
 			return ResponseUtil.generateResponse(400, "Invalid request", "error", errorList);
 		}
-		List<Invoice> invoiceList = InvoiceDb.getInvoices(criteria, orderBy);
+
+		List<Invoice> invoiceList = InvoiceDb.getInvoices(criteria, orderBy, pageLimit);
 		return ResponseUtil.generateResponse(200, "Invoice retrieval success", Invoice.responseKey, invoiceList);
 	}
 }

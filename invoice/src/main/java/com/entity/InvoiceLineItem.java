@@ -3,17 +3,20 @@ package com.entity;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.gson.annotations.SerializedName;
 
 @XmlRootElement
+@JsonPropertyOrder({"line_item_id", "invoice_id", "item_id", "item_name", "rate", "quantity", "amount"})
 public class InvoiceLineItem {
-	@SerializedName("line_item_id")
+	@JsonProperty("line_item_id")
 	private int lineItemId;
-	@SerializedName("invoice_id")
+	@JsonProperty("invoice_id")
 	private int invoiceid;
-	@SerializedName("item_id")
+	@JsonProperty("item_id")
 	private int itemId;
-	@SerializedName("item_name")
+	@JsonProperty("item_name")
 	private String itemName;
 	private int rate;
 	private int quantity = 1;
@@ -30,7 +33,7 @@ public class InvoiceLineItem {
 	public void setLineItemId(int id) {
 		this.lineItemId = id;
 	}
-	
+
 	@XmlElement(name = "item_id")
 	public int getItemId() {
 		return itemId;
@@ -56,7 +59,7 @@ public class InvoiceLineItem {
 	public void setAmount(int amount) {
 		this.amount = amount;
 	}
-	
+
 	@XmlElement(name = "invoice_id")
 	public int getInvoiceid() {
 		return invoiceid;
@@ -65,7 +68,7 @@ public class InvoiceLineItem {
 	public void setInvoiceid(int invoiceid) {
 		this.invoiceid = invoiceid;
 	}
-	
+
 	@XmlElement(name = "item_name")
 	public String getItemName() {
 		return itemName;

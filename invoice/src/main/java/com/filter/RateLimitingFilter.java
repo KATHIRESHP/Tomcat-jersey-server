@@ -46,13 +46,19 @@ public class RateLimitingFilter extends HttpFilter implements Filter {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-		RateLimiter rateLimiter = clientRateLimiters.computeIfAbsent(httpRequest.getRemoteAddr(), ip -> RateLimiter.create(1));
+		RateLimiter rateLimiter = clientRateLimiters.computeIfAbsent(httpRequest.getRemoteAddr(), ip -> RateLimiter.create(10));
 
 		if (rateLimiter.tryAcquire()) {
 			chain.doFilter(request, response);
 		} else {
 			httpResponse.setStatus(429);
-			httpResponse.getWriter().write("Too many calls within a second.");
+            httpResponse.setContentType("application/json");
+
+            double waitTimeSeconds = rateLimiter.getRate();
+            httpResponse.setHeader("Retry-After", Math.ceil(1.0 / waitTimeSeconds) + "seconds");
+
+            String responseBody = String.format("{\"error\": \"Too many requests. Please wait %d seconds before trying again.\", \"retry_after\": \"%d seconds\"}", (int) Math.ceil(1.0 / waitTimeSeconds), (int) Math.ceil(1.0 / waitTimeSeconds));
+            httpResponse.getWriter().write(responseBody);
 		}
 	}
 

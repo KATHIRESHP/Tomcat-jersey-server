@@ -8,12 +8,15 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.gson.annotations.SerializedName;
 
 @XmlRootElement
+@JsonPropertyOrder({"item_id", "name", "description", "price"})
 public class Item {
 	
-	@SerializedName("item_id")
+	@JsonProperty("item_id")
 	private int itemId;
 	private String name;
 	private String description;
@@ -32,6 +35,8 @@ public class Item {
 		allowedParameters.add("sort");
 		allowedParameters.add("sort_order");
 		allowedParameters.add("search_text");
+		allowedParameters.add("page");
+		allowedParameters.add("size");
 
 		allowedFilterMap.put("item_id", "itemId");
 		allowedFilterMap.put("name", "itemName");
@@ -42,7 +47,7 @@ public class Item {
 	}
 
 	public static String responseKey = "items";
-	
+
 	@XmlElement(name = "item_id")
 	public int getItemId() {
 		return itemId;

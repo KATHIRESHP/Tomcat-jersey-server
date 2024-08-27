@@ -5,11 +5,12 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 public class ResponseUtil {
-	private static Gson gson = new Gson();
+	private static ObjectMapper objectMapper = new ObjectMapper();
 	
 	public static Response generateResponse(int code, String message) {
 		return generateResponse(code, message, "",  null);
@@ -22,7 +23,13 @@ public class ResponseUtil {
 		if (responseObj != null && !dataKey.isEmpty()) {			
 			responseMap.put(dataKey, responseObj);
 		}
-		String responseStr = gson.toJson(responseMap);
+		String responseStr = null;
+		try {
+			responseStr = objectMapper.writeValueAsString(responseMap);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return Response.status(code).entity(responseStr).build();
 	}
 }

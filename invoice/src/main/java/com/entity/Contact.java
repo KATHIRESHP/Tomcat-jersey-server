@@ -9,11 +9,14 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.gson.annotations.SerializedName;
 
 @XmlRootElement
+@JsonPropertyOrder({"contact_id", "name", "email"})
 public class Contact {
-	@SerializedName("contact_id")
+	@JsonProperty("contact_id")
 	private int contactId;
 	private String name;
 	private String email;
@@ -33,6 +36,8 @@ public class Contact {
 		allowedParameters.add("sort");
 		allowedParameters.add("sort_order");
 		allowedParameters.add("search_text");
+		allowedParameters.add("page");
+		allowedParameters.add("size");
 
 		allowedFilterMap.put("contact_id", "contactId");
 		allowedFilterMap.put("name", "name");

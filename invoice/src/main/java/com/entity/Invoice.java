@@ -1,27 +1,33 @@
 package com.entity;
 
 import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.google.gson.annotations.SerializedName;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
+@JsonPropertyOrder({"invoice_id", "contact_id", "total_amount", "status", "line_items"})
 public class Invoice {
-	
-	@SerializedName("invoice_id")
+
+	@JsonProperty("invoice_id")
 	private int invoiceId;
-	
-	@SerializedName("contact_id")
+	@JsonProperty("contact_id")
 	private int contactId;
+	@JsonProperty("total_amount")
 	private int total;
 	
 	private String status;
-	@SerializedName("line_items")
+	@JsonProperty("line_items")
 	private List<InvoiceLineItem> lineItems = new ArrayList<InvoiceLineItem>();
 
 	private static Map<String,String> allowedFilterMap = new HashMap<String, String>();
@@ -39,6 +45,8 @@ public class Invoice {
 	{
 		allowedParameters.add("sort");
 		allowedParameters.add("sort_order");
+		allowedParameters.add("page");
+		allowedParameters.add("size");
 
 		allowedFilterMap.put("contact_id", "contactId");
 		allowedFilterMap.put("invoice_id", "invoiceId");
@@ -59,6 +67,7 @@ public class Invoice {
 	public void setInvoiceId(int id) {
 		this.invoiceId = id;
 	}
+
 	
 	@XmlElement(name = "contact_id")
 	public int getContactId() {
@@ -67,14 +76,14 @@ public class Invoice {
 	public void setContactId(int contactId) {
 		this.contactId = contactId;
 	}
-	public int getTotalAmount() {
+	public int getTotal() {
 		return total;
 	}
-	public void setTotalAmount(int total) {
+	public void setTotal(int total) {
 		this.total = total;
 	}
 	
-	@XmlElement(name = "line_items")
+	@XmlElement( name = "line_items")
 	public List<InvoiceLineItem> getLineItems() {
 		return lineItems;
 	}
@@ -110,5 +119,10 @@ public class Invoice {
 	}
 	public static List<String> getAllowedParameters() {
 		return allowedParameters;
+	}
+	
+	@Override
+	public String toString() {
+		return "Contact id: " + this.getContactId() + " lineItems length: " + this.getLineItems().size();
 	}
 }

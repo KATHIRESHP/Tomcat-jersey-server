@@ -1,38 +1,46 @@
 package com.database;
 
-import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.entity.Contact;
-import com.entity.Invoice;
+import com.util.QueryUtil;
 
 public class ContactDb {
-	
 
-	public static List<Contact> getContacts(String criteria, String orderBy) {
-		String query = "Select email, name, contactId from ContactTable";
+	private static final HashMap<String, String> queryMap = new HashMap<String, String>();
+	static {
+		initializeQueryMap();
+	}
+	private static void initializeQueryMap() {
+		String selectAllQuery = "Select email, name, contactId from ContactTable";
+		String selectQuery = "Select email, name, contactId from ContactTable where contactId = ?";
+		String insertQuery = "insert into ContactTable (contactId, name, email) values (?, ?, ?)";
+		String updateQuery = "update ContactTable set name = ?, email = ? where contactId = ?";
+		String deleteQuery = "delete from ContactTable where contactId = ?";
 
-		if (!criteria.isEmpty()) {
-			query += " where " + criteria;
-		}
-		if (!orderBy.isEmpty()) {
-			query += orderBy;
-		}
+		queryMap.put("SelectAllQuery", selectAllQuery);
+		queryMap.put("SelectQuery", selectQuery);
+		queryMap.put("InsertQuery", insertQuery);
+		queryMap.put("UpdateQuery", updateQuery);
+		queryMap.put("DeleteQuery", deleteQuery);
+	}
+
+	public static List<Contact> getContacts(String criteria, String orderBy, String pageLimit) {
+		String query = queryMap.get("SelectAllQuery");
+		query = QueryUtil.appendCriOrderLimit(query, criteria, orderBy, pageLimit);
+		
 		List<Contact> contactsList = new ArrayList<Contact>();
 		try {
 			System.out.println("Query " + query);
 			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query);
 			ResultSet rs = pst.executeQuery();
 			while(rs.next()) {
-				Contact contact = new Contact();
-				contact.setEmail(rs.getString("email"));
-				contact.setName(rs.getString("name"));
-				contact.setContactId(rs.getInt("contactId"));
-				contactsList.add(contact);
+				contactsList.add(getContact(rs));
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -42,17 +50,13 @@ public class ContactDb {
 	}
 	
 	public static Contact getContact(int id) {
-		String query = "Select email, name, contactId from ContactTable where contactId = ?";
+		String query = queryMap.get("SelectQuery");
 		try {
 			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query);
 			pst.setInt(1, id);
 			ResultSet rs = pst.executeQuery();
 			if (rs.next()) {
-				Contact contact = new Contact();
-				contact.setEmail(rs.getString("email"));
-				contact.setName(rs.getString("name"));
-				contact.setContactId(rs.getInt("contactId"));
-				return contact;
+				return getContact(rs);
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -60,10 +64,18 @@ public class ContactDb {
 		}
 		return null;
 	}
-	
-	
+
+	private static Contact getContact(ResultSet rs) throws SQLException
+	{
+		Contact contact = new Contact();
+		contact.setEmail(rs.getString("email"));
+		contact.setName(rs.getString("name"));
+		contact.setContactId(rs.getInt("contactId"));
+		return contact;
+	}
+
 	public static boolean addContact(Contact contact) {
-		String query = "insert into ContactTable (contactId, name, email) values (?, ?, ?)";
+		String query = queryMap.get("InsertQuery");
 		try {
 			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query);
 			pst.setInt(1, contact.getContactId());
@@ -78,7 +90,7 @@ public class ContactDb {
 	}
 	
 	public static boolean updateContact(int id, Contact contact) {
-		String query = "update ContactTable set name = ?, email = ? where contactId = ?";
+		String query = queryMap.get("UpdateQuery");
 		try {
 			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query);
 			pst.setString(1, contact.getName());
@@ -93,7 +105,7 @@ public class ContactDb {
 	}
 	
 	public static boolean deleteContact(int id) {
-		String query = "delete from ContactTable where contactId = ?";
+		String query = queryMap.get("DeleteQuery");
 		try {
 			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query);
 			pst.setInt(1, id);
@@ -104,5 +116,4 @@ public class ContactDb {
 		}
 		return false;
 	}
-
 }

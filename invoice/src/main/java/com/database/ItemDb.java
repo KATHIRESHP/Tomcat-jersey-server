@@ -8,19 +8,18 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.entity.Item;
+import com.util.QueryUtil;
 
 public class ItemDb {
-	private static HashMap<String, String> queryMap = new HashMap<String, String>();
+	private static final HashMap<String, String> queryMap = new HashMap<String, String>();
 	static {
-		intializeQueryMap();
+		initializeQueryMap();
 	}
-	private static void intializeQueryMap() {
+	private static void initializeQueryMap() {
 		String selectAllQuery = "Select itemName, itemId, description, price from ItemTable";
 		String selectQuery = "Select itemName, itemId, description, price from ItemTable where itemId = ?";
-		String updateQuery = "Update ItemTable set itemName = ?, description = ?, price = ? "
-				+ "where itemId = ?";
-		String createQuery = "Insert into ItemTable (itemId , itemName, description, price) "
-				+ "values(?, ?, ?, ?)";
+		String updateQuery = "Update ItemTable set itemName = ?, description = ?, price = ? where itemId = ?";
+		String createQuery = "Insert into ItemTable (itemId , itemName, description, price) values(?, ?, ?, ?)";
 		String deleteQuery = "Delete from ItemTable where itemId = ?";
 		
 		queryMap.put("DeleteQuery", deleteQuery);
@@ -33,6 +32,7 @@ public class ItemDb {
 	public static boolean addItem(Item item) {
 		String query = queryMap.get("InsertQuery");
 		try {
+			System.out.println(query);
 			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query);
 			pst.setInt(1, item.getItemId());
 			pst.setString(2, item.getName());
@@ -51,6 +51,7 @@ public class ItemDb {
 	public static boolean updateItem(int id, Item item) {
 		String query = queryMap.get("UpdateQuery");
 		try {
+			System.out.println(query);
 			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query);
 			pst.setString(1, item.getName());
 			pst.setString(2, item.getDescription());
@@ -68,6 +69,7 @@ public class ItemDb {
 	public static Item getItem(int id) {
 		String query = queryMap.get("SelectQuery");
 		try {
+			System.out.println(query);
 			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query);
 			pst.setInt(1, id);
 			ResultSet rs = pst.executeQuery();
@@ -87,8 +89,10 @@ public class ItemDb {
 	}
 	
 	public static List<Item> getItems(ArrayList<Integer> itemIdList) {
-		List<Item>  itemList = new ArrayList<Item>();
-		StringBuilder query = new StringBuilder("select * from ItemTable where itemId in (");
+		if (itemIdList.isEmpty()) {
+			return new ArrayList<Item>();
+		}
+		StringBuilder query = new StringBuilder("select itemId, itemName, price, description from ItemTable where itemId in (");
 	    for (int i = 0; i < itemIdList.size(); i++) {
 	        query.append(itemIdList.get(i));
 	        if (i < itemIdList.size() - 1) {
@@ -96,27 +100,13 @@ public class ItemDb {
 	        }
 	    }
 	    query.append(")");
-		try {
-			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query.toString());
-			ResultSet rs = pst.executeQuery();
-			while(rs.next()) {
-				Item item = new Item();
-				item.setDescription(rs.getString("description"));
-				item.setName(rs.getString("itemName"));
-				item.setItemId(rs.getInt("itemId"));
-				item.setPrice(rs.getInt("price"));
-				itemList.add(item);
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return itemList;
+		return getItemList(query.toString());
 	}
 
 	public static boolean deleteItem(int id) {
 		String query = queryMap.get("DeleteQuery");
 		try {
+			System.out.println(query);
 			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query);
 			pst.setInt(1, id);
 			return pst.executeUpdate() > 0;
@@ -127,19 +117,19 @@ public class ItemDb {
 		return false;
 	}
 
-	public static List<Item> getItems(String criteria, String orderBy) {
+	public static List<Item> getItems(String criteria, String orderBy,  String pageLimit) {
 		String query = queryMap.get("SelectAllQuery");
+		query = QueryUtil.appendCriOrderLimit(query, criteria, orderBy, pageLimit);
+		return getItemList(query);
+	}
 
-		if (!criteria.isEmpty()) {
-			query += " where " + criteria;
-		}
-		if (!orderBy.isEmpty()) {
-			query += orderBy;
-		}
-		List<Item> itemList = new ArrayList<Item>();
-		try {
-			System.out.println("Query " + query);
-			PreparedStatement pst = SqlConnection.getConnection().prepareStatement(query);
+	private static List<Item> getItemList(String query)
+	{
+		List<Item> itemList = new ArrayList<>();
+		PreparedStatement pst = null;
+		try
+		{
+			pst = SqlConnection.getConnection().prepareStatement(query);
 			ResultSet rs = pst.executeQuery();
 			while(rs.next()) {
 				Item item = new Item();
@@ -149,9 +139,10 @@ public class ItemDb {
 				item.setPrice(rs.getInt("price"));
 				itemList.add(item);
 			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		}
+		catch(SQLException e)
+		{
+			throw new RuntimeException(e);
 		}
 		return itemList;
 	}

@@ -78,7 +78,7 @@ public class ContactResource {
 		System.out.println(" delete contact Contact id " + id);
 		List<Invoice> invoiceList = InvoiceDb.getContactInvoice(id);
 		System.out.println("invoice list " + invoiceList);
-		if (invoiceList != null && !invoiceList.isEmpty()) {
+		if (!invoiceList.isEmpty()) {
 			return ResponseUtil.generateResponse(409, "Unable to delete contact since it has invoice associated");
 		}
 		if (ContactDb.deleteContact(id)) {
