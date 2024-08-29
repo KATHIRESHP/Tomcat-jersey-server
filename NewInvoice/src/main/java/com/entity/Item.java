@@ -96,7 +96,8 @@ public class Item {
 		return allowedParameters;
 	}
 
-	public List<Error> validateItem() {
+	public List<Error> validateItem() throws Exception
+	{
 		List<Error> errorList = new ArrayList<Error>();
 		if (this.getPrice() < 0) {
 			Error error = new Error();
@@ -127,7 +128,8 @@ public class Item {
 	private static final String deleteQuery = "Delete from ItemTable where itemId = ?";
 
 
-	public static List<Item> getItems() {
+	public static List<Item> getItems() throws Exception
+	{
 		try {
 			return getItems(BaseDb.executeQuery(selectAllQuery));
 		}
@@ -137,7 +139,8 @@ public class Item {
 		return new ArrayList<>();
 	}
 
-	public static List<Item> getItems(String criteria, String orderBy, String limit) {
+	public static List<Item> getItems(String criteria, String orderBy, String limit) throws Exception
+	{
 		String query = selectAllQuery;
 		query = QueryUtil.appendCriOrderLimit(query, criteria, orderBy, limit);
 		try {
@@ -149,7 +152,7 @@ public class Item {
 		return new ArrayList<>();
 	}
 
-	public static List<Item> getItems(List<Integer> itemIdList)
+	public static List<Item> getItems(List<Integer> itemIdList) throws Exception
 	{
 		if (itemIdList.isEmpty()) {
 			return new ArrayList<Item>();
@@ -174,7 +177,8 @@ public class Item {
 		return new ArrayList<>();
 	}
 
-	private static List<Item> getItems(ResultSet rs) {
+	private static List<Item> getItems(ResultSet rs) throws Exception
+	{
 		List<Item> itemList = new ArrayList<>();
 		try {
 			while(rs.next()) {
@@ -187,7 +191,8 @@ public class Item {
 		return itemList;
 	}
 
-	public static Item getItem(int itemId) {
+	public static Item getItem(int itemId) throws Exception
+	{
 		try {
 			ResultSet rs = BaseDb.executeQuery(selectQuery, itemId);
 			if (rs.next()) {
@@ -200,20 +205,23 @@ public class Item {
 		return null;
 	}
 
-	public boolean update(int itemId) {
+	public boolean update(int itemId) throws Exception
+	{
 		return BaseDb.executeUpdate(updateQuery, this.getName(), this.getDescription(), this.getPrice(), itemId);
 	}
 
-	public boolean create() {
+	public boolean create() throws Exception
+	{
 		this.setItemId();
 		return BaseDb.executeUpdate(insertQuery, this.getItemId(), this.getName(), this.getDescription(), this.getPrice());
 	}
 
-	public boolean delete() {
+	public boolean delete() throws Exception
+	{
 		return BaseDb.executeUpdate(deleteQuery, this.getItemId());
 	}
 
-	private static Item mapObject(ResultSet rs) throws SQLException
+	private static Item mapObject(ResultSet rs) throws Exception
 	{
 		Item item = new Item();
 		item.setDescription(rs.getString("description"));

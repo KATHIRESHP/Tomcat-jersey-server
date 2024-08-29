@@ -1,6 +1,8 @@
 package com.resource;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -19,80 +21,101 @@ import com.entity.Item;
 import com.util.*;
 
 @Path("/items")
-public class ItemResource
-{
+public class ItemResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getItems(@Context UriInfo uriInfo)
-	{
-		return ItemUtil.getItems(uriInfo);
+	public Response getItems(@Context UriInfo uriInfo) {
+		try {
+			return ItemUtil.getItems(uriInfo);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseUtil.errorResponse();
+		}
 	}
 
 	@Path("/{id}")
 	@GET
 	@PathParam("id")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getItem(@PathParam("id") int id)
-	{
-		Item item = Item.getItem(id);
-		if(item != null)
-		{
-			return ResponseUtil.generateResponse(200, "Item retrieval success", Item.responseKey, item);
+	public Response getItem(@PathParam("id") int id) {
+		try {
+			Item item = Item.getItem(id);
+			if (item != null) {
+				return ResponseUtil.generateResponse(200, "Item retrieval success", Item.responseKey, item);
+			}
+			return ResponseUtil.generateResponse(404, "Item not found");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseUtil.errorResponse();
 		}
-		return ResponseUtil.generateResponse(404, "Item not found");
 	}
 
 	@GET
 	@Path("/{id}/invoices")
 	@PathParam("{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getItemInvoice(@PathParam("id") int id)
-	{
-		if(Item.getItem(id) == null)
-		{
-			return ResponseUtil.generateResponse(404, "Item not found");
+	public Response getItemInvoice(@PathParam("id") int id) {
+		try {
+			if (Item.getItem(id) == null) {
+				return ResponseUtil.generateResponse(404, "Item not found");
+			}
+			List<Invoice> invoiceList = Invoice.getItemInvoices(id);
+			return ResponseUtil.generateResponse(200, "Invoice retrieval success", Invoice.responseKey, invoiceList);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseUtil.errorResponse();
 		}
-		List<Invoice> invoiceList = Invoice.getItemInvoices(id);
-		return ResponseUtil.generateResponse(200, "Invoice retrieval success", Invoice.responseKey, invoiceList);
 	}
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response createItem(Item item)
-	{
-		return ItemUtil.addOrEditItem(item, 0);
+	public Response createItem(Item item) {
+		try {
+			return ItemUtil.addOrEditItem(item, 0);
+		} catch (Exception e) {
+			e.printStackTrace();
+			;
+			return ResponseUtil.errorResponse();
+		}
 	}
 
 	@Path("/{id}")
 	@PUT
 	@PathParam("id")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response editItem(@PathParam("id") int id, Item item)
-	{
-		if(Item.getItem(id) != null)
-		{
-			return ItemUtil.addOrEditItem(item, id);
+	public Response editItem(@PathParam("id") int id, Item item) {
+		try {
+			if (Item.getItem(id) != null) {
+				return ItemUtil.addOrEditItem(item, id);
+			}
+			return ResponseUtil.generateResponse(404, "Item not available");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseUtil.errorResponse();
 		}
-		return ResponseUtil.generateResponse(404, "Item not available");
 	}
 
 	@Path("/{id}")
 	@DELETE
 	@PathParam("id")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response deleteItem(@PathParam("id") int id)
-	{
-		Item item = Item.getItem(id);
-		List<Invoice> invoiceList = Invoice.getItemInvoices(id);
-		if(item != null) {
-			if(!invoiceList.isEmpty()) {
-				return ResponseUtil.generateResponse(409, "Unable to delete item since it has invoice associated");
+	public Response deleteItem(@PathParam("id") int id) {
+		try {
+			Item item = Item.getItem(id);
+			List<Invoice> invoiceList = Invoice.getItemInvoices(id);
+			if (item != null) {
+				if (!invoiceList.isEmpty()) {
+					return ResponseUtil.generateResponse(409, "Unable to delete item since it has invoice associated");
+				}
+				if (item.delete()) {
+					return ResponseUtil.generateResponse(200, "Item deletion success");
+				}
 			}
-			if(item.delete()) {
-				return ResponseUtil.generateResponse(200, "Item deletion success");
-			}
+			return ResponseUtil.generateResponse(404, "Item not found");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseUtil.errorResponse();
 		}
-		return ResponseUtil.generateResponse(404, "Item not found");
 	}
 }

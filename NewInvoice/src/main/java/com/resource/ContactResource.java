@@ -1,6 +1,8 @@
 package com.resource;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -26,7 +28,14 @@ public class ContactResource
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getContacts(@Context UriInfo uriInfo)
 	{
-		return ContactUtil.getContacts(uriInfo);
+		try
+		{
+			return ContactUtil.getContacts(uriInfo);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			return ResponseUtil.errorResponse();
+		}
 	}
 
 	@GET
@@ -35,12 +44,21 @@ public class ContactResource
 	@PathParam("{id}")
 	public Response getContact(@PathParam("id") int id)
 	{
-		Contact contact = Contact.getContact(id);
-		if(contact != null)
+		try
 		{
-			return ResponseUtil.generateResponse(200, "Contact retrival success", Contact.responseKey, contact);
+			Contact contact = null;
+			contact = Contact.getContact(id);
+			if(contact != null)
+			{
+				return ResponseUtil.generateResponse(200, "Contact retrieval success", Contact.responseKey, contact);
+			}
+			return ResponseUtil.generateResponse(404, "Contact not found");
 		}
-		return ResponseUtil.generateResponse(404, "Contact not found");
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return ResponseUtil.errorResponse();
+		}
 	}
 
 	@GET
@@ -49,19 +67,35 @@ public class ContactResource
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getContactInvoice(@PathParam("id") int id)
 	{
-		if(Contact.getContact(id) != null)
+		try
 		{
-			List<Invoice> invoiceList = Invoice.getContactInvoices(id);
-			return ResponseUtil.generateResponse(200, "Invoice retrieval success", Invoice.responseKey, invoiceList);
+			if(Contact.getContact(id) != null)
+			{
+				List<Invoice> invoiceList = Invoice.getContactInvoices(id);
+				return ResponseUtil.generateResponse(200, "Invoice retrieval success", Invoice.responseKey, invoiceList);
+			}
+			return ResponseUtil.generateResponse(404, "Contact not found");
 		}
-		return ResponseUtil.generateResponse(404, "Contact not found");
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return ResponseUtil.errorResponse();
+		}
 	}
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createContact(Contact contact)
 	{
-		return ContactUtil.addOrEditContact(contact, 0);
+		try
+		{
+			return ContactUtil.addOrEditContact(contact, 0);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return ResponseUtil.errorResponse();
+		}
 	}
 
 	@PUT
@@ -70,11 +104,19 @@ public class ContactResource
 	@PathParam("{id}")
 	public Response editContact(@PathParam("id") int id, Contact contact)
 	{
-		if(Contact.getContact(id) != null)
+		try
 		{
-			return ContactUtil.addOrEditContact(contact, id);
+			if(Contact.getContact(id) != null)
+			{
+				return ContactUtil.addOrEditContact(contact, id);
+			}
+			return ResponseUtil.generateResponse(404, "Contact not found");
 		}
-		return ResponseUtil.generateResponse(404, "Contact not found");
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return ResponseUtil.errorResponse();
+		}
 	}
 
 	@DELETE
@@ -83,20 +125,28 @@ public class ContactResource
 	@PathParam("{id}")
 	public Response deleteContact(@PathParam("id") int id)
 	{
-		Contact contact = Contact.getContact(id);
-		if(contact != null)
+		try
 		{
-			List<Invoice> invoiceList = Invoice.getContactInvoices(id);
-			if(!invoiceList.isEmpty())
+			Contact contact = Contact.getContact(id);
+			if(contact != null)
 			{
-				return ResponseUtil.generateResponse(409, "Unable to delete contact since it has invoice associated");
+				List<Invoice> invoiceList = Invoice.getContactInvoices(id);
+				if(!invoiceList.isEmpty())
+				{
+					return ResponseUtil.generateResponse(409, "Unable to delete contact since it has invoice associated");
+				}
+				if(contact.delete())
+				{
+					return ResponseUtil.generateResponse(200, "Contact deletion success");
+				}
 			}
-			if(contact.delete())
-			{
-				return ResponseUtil.generateResponse(200, "Contact deletion success");
-			}
+			return ResponseUtil.generateResponse(404, "Contact not found");
 		}
-		return ResponseUtil.generateResponse(404, "Contact not found");
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return ResponseUtil.errorResponse();
+		}
 	}
 
 }

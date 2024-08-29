@@ -12,7 +12,8 @@ import com.entity.Error;
 public class ContactUtil {
 
 
-	public static Response addOrEditContact(Contact contact, int contactId) {
+	public static Response addOrEditContact(Contact contact, int contactId) throws Exception
+	{
 		List<Error> errorList = contact.validateContact();
 		if(!errorList.isEmpty()) {
 			return ResponseUtil.generateResponse(400, "Invalid data", "error", errorList);
@@ -31,19 +32,19 @@ public class ContactUtil {
 			int responseCode = isUpdate ? 200 : 201;
 			return ResponseUtil.generateResponse(responseCode, responseStr, Contact.responseKey, Contact.getContact(contactId));
 		}
-		return ResponseUtil.generateResponse(500, "Error in " + ((isUpdate) ? "updating" : "creating") + " contact");
+		return ResponseUtil.generateResponse(409, "Error in " + ((isUpdate) ? "updating" : "creating") + " contact");
 	}
 
-	public static Response getContacts(UriInfo uriInfo)
+	public static Response getContacts(UriInfo uriInfo) throws Exception
 	{
 		List<Error> errorList = SecurityUtil.validateRequestParams(uriInfo, Contact.getAllowedParameters(), Contact.getAllowedFilterMap(), Contact.getAllowedSortMap());
 		MultivaluedMap<String, String> queryParamsMap = uriInfo.getQueryParameters();
 
 		String criteria = QueryUtil.handleParamCriteria(queryParamsMap, Contact.getAllowedFilterMap(), "ContactTable");
-		String orderBy = QueryUtil.handleParamSortOrder(queryParamsMap, Contact.getAllowedSortMap(), "ContactTable", errorList);
-		String pageLimit = QueryUtil.handlePagination(queryParamsMap, errorList);
+		String orderBy = QueryUtil.handleParamSortOrder(queryParamsMap, Contact.getAllowedSortMap(), "ContactTable");
+		String pageLimit = QueryUtil.handlePagination(queryParamsMap);
 
-		if (!errorList.isEmpty()) {
+		if (!errorList.isEmpty()) { 
 			return ResponseUtil.generateResponse(400, "Invalid request", "error", errorList);
 		}
 		if (queryParamsMap.containsKey("search_text")) {

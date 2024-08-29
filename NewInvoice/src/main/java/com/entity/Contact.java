@@ -92,7 +92,8 @@ public class Contact {
 	}
 
 
-	public List<Error> validateContact() {
+	public List<Error> validateContact() throws Exception
+	{
 		List<Error> errorList = new ArrayList<Error>();
 		if (this.getName() == null || this.getName().trim().isEmpty() || this.getName().length() > 25) {
 			Error error = new Error();
@@ -100,7 +101,7 @@ public class Contact {
 			error.setMessage("Name should be less than 25 chars and not empty");
 			errorList.add(error);
 		}
-		if (this.getEmail() == null || this.getEmail().trim().length() > 25 || this.getEmail().isEmpty()) {
+		if (this.getEmail() == null || this.getEmail().length() > 25 || this.getEmail().trim().isEmpty()) {
 			Error error = new Error();
 			error.setCode(400);
 			error.setMessage("Email should be less than 25 chars and not empty");
@@ -115,10 +116,11 @@ public class Contact {
 	private static final String updateQuery = "update ContactTable set name = ?, email = ? where contactId = ?";
 	private static final String deleteQuery = "delete from ContactTable where contactId = ?";
 	
-	public static List<Contact> getContacts(String criteria, String orderBy, String pageLimit) {
-		String query = selectAllQuery;
-		query = QueryUtil.appendCriOrderLimit(query, criteria, orderBy, pageLimit);
+	public static List<Contact> getContacts(String criteria, String orderBy, String pageLimit)
+	{
 		try {
+			String query = selectAllQuery;
+			query = QueryUtil.appendCriOrderLimit(query, criteria, orderBy, pageLimit);
 			return getContacts(BaseDb.executeQuery(query));
 		}
 		catch(Exception e)
@@ -128,7 +130,7 @@ public class Contact {
 		return null;
 	}
 
-	private static List<Contact> getContacts(ResultSet rs) throws SQLException
+	private static List<Contact> getContacts(ResultSet rs) throws Exception
 	{
 		List<Contact> contactList = new ArrayList<>();
 		while(rs.next()) {
@@ -138,7 +140,8 @@ public class Contact {
 	}
 
 
-	public static Contact getContact(int contactId) {
+	public static Contact getContact(int contactId)
+	{
 		try {
 			ResultSet rs = BaseDb.executeQuery(selectQuery, contactId);
 			if (rs.next()) {
@@ -151,21 +154,24 @@ public class Contact {
 		return null;
 	}
 
-	public boolean create() {
+	public boolean create()
+	{
 		this.setContactId();
 		return BaseDb.executeUpdate(insertQuery, this.getContactId(), this.getName(), this.getEmail());
 	}
 
 
-	public boolean update(int contactId) {
+	public boolean update(int contactId)
+	{
 		return BaseDb.executeUpdate(updateQuery, this.getName(), this.getEmail(), contactId);
 	}
 
-	public boolean delete() {
+	public boolean delete()
+	{
 		return BaseDb.executeUpdate(deleteQuery, this.getContactId());
 	}
 
-	private static Contact mapObject(ResultSet rs) throws SQLException
+	private static Contact mapObject(ResultSet rs) throws Exception
 	{
 		Contact contact = new Contact();
 		contact.setEmail(rs.getString("email"));

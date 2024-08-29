@@ -11,7 +11,8 @@ import com.entity.Item;
 
 public class ItemUtil {
 
-	public static Response addOrEditItem(Item item, int itemId) {
+	public static Response addOrEditItem(Item item, int itemId) throws Exception
+	{
 		List<Error> errorList = item.validateItem();
 		if (!errorList.isEmpty()) {
 			return ResponseUtil.generateResponse(400, "Invalid data", "error", errorList);
@@ -30,17 +31,17 @@ public class ItemUtil {
 			int responseCode = (isUpdate) ? 200 : 201;
 			return ResponseUtil.generateResponse(responseCode, responseStr, Item.responseKey, Item.getItem(itemId));
 		}
-		return ResponseUtil.generateResponse(500, "Error in " + ((isUpdate) ? "updating" : "creating") + " Item");
+		return ResponseUtil.generateResponse(409, "Error in " + ((isUpdate) ? "updating" : "creating") + " Item");
 	}
 
-	public static Response getItems(UriInfo uriInfo)
+	public static Response getItems(UriInfo uriInfo) throws Exception
 	{
 		List<Error> errorList = SecurityUtil.validateRequestParams(uriInfo, Item.getAllowedParameters(), Item.getAllowedFilterMap(), Item.getAllowedSortMap());
 		MultivaluedMap<String, String> queryParamsMap = uriInfo.getQueryParameters();
 
 		String criteria = QueryUtil.handleParamCriteria(queryParamsMap, Item.getAllowedFilterMap(), "ItemTable");
-		String orderBy = QueryUtil.handleParamSortOrder(queryParamsMap, Item.getAllowedSortMap(), "ItemTable", errorList);
-		String pageLimit = QueryUtil.handlePagination(queryParamsMap, errorList);
+		String orderBy = QueryUtil.handleParamSortOrder(queryParamsMap, Item.getAllowedSortMap(), "ItemTable");
+		String pageLimit = QueryUtil.handlePagination(queryParamsMap);
 
 		if (!errorList.isEmpty()) {
 			return ResponseUtil.generateResponse(400, "Invalid request", "error", errorList);

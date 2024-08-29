@@ -83,7 +83,8 @@ public class InvoiceLineItem {
 	}
 
 
-	public void calculateAmount() {
+	public void calculateAmount()  throws Exception
+	{
 		if (this.getRate() < 0) {
 			Item item = Item.getItem(this.getItemId());
 			if (item != null) {
@@ -98,16 +99,17 @@ public class InvoiceLineItem {
 
 	private static final String selectInvoiceLineItemQuery = "select lineItemId, invoiceId, rate, quantity, amount, itemId from LineItemTable where lineItemId = ? and invoiceId = ?";
 	private static final String insertQuery = "insert into LineItemTable (lineItemId, invoiceId, itemId, rate, quantity, amount) values (?, ?, ?, ?, ?, ?)";
-	private static final String selectInvLineItemsQuery = "select invoiceId, lineItemId, itemId, rate, quantity, amount from LineItemTable where invoiceId = ?";
 	private static final String updateQuery = "update LineItemTable set itemId = ?, rate = ?, quantity = ?, amount = ? where lineItemId = ?";
 
 
-	public boolean create(int invoiceId) {
+	public boolean create(int invoiceId)
+	{
 		return BaseDb.executeUpdate(insertQuery, this.getLineItemId(), invoiceId, this.getItemId(), this.getRate(), this.getQuantity(), this.getAmount());
 	}
 
 
-	public boolean update() {
+	public boolean update()
+	{
 		return BaseDb.executeUpdate(updateQuery, this.getItemId(), this.getRate(), this.getQuantity(), this.getAmount(), this.getLineItemId());
 	}
 
@@ -124,21 +126,6 @@ public class InvoiceLineItem {
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-
-	public static List<InvoiceLineItem> getInvoiceLineItems(int invoiceId) {
-		List<InvoiceLineItem> lineItemList = new ArrayList<>();
-		try {
-			ResultSet rs = BaseDb.executeQuery(selectInvLineItemsQuery, invoiceId);
-			while (rs.next()) {
-				lineItemList.add(mapObject(rs));
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		return lineItemList;
 	}
 
 	public static boolean deleteLineItems(List<Integer> existingLineItems)
@@ -160,7 +147,7 @@ public class InvoiceLineItem {
 		return BaseDb.executeUpdate(query.toString());
 	}
 
-	private static InvoiceLineItem mapObject(ResultSet rs) throws SQLException
+	private static InvoiceLineItem mapObject(ResultSet rs) throws Exception
 	{
 		InvoiceLineItem lineItem = new InvoiceLineItem();
 

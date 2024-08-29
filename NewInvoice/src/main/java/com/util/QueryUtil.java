@@ -26,14 +26,15 @@ public class QueryUtil
 		return criteriaBuilder.toString();
 	}
 
-	public static String groupCriteria(String criteria1, String criteria2, String conjuctor) {
+	public static String groupCriteria(String criteria1, String criteria2, String conjuctor)
+	{
 		if (criteria2.isEmpty()) {
 			return criteria1;
 		}
 		return " ( " + criteria1 + " " + conjuctor + " " + criteria2 + " ) ";
 	}
 
-	public static String handlePagination(MultivaluedMap<String, String> queryParamsMap, List<Error> errorList)
+	public static String handlePagination(MultivaluedMap<String, String> queryParamsMap)
 	{
 		int page = 0, size = 0;
 		String pageLimit = "";
@@ -45,10 +46,7 @@ public class QueryUtil
 				pageLimit = " limit " + offset +", " + size;
 			}
 			catch (Exception e) {
-				Error error = new Error();
-				error.setCode(400);
-				error.setMessage("Invalid page/size format");
-				errorList.add(error);
+				e.printStackTrace();
 			}
 		} else {
 			pageLimit = " limit 0, 100";
@@ -56,7 +54,8 @@ public class QueryUtil
 		return pageLimit;
 	}
 
-	public static String appendCriOrderLimit(String query, String criteria, String orderBy, String pageLimit) {
+	public static String appendCriOrderLimit(String query, String criteria, String orderBy, String pageLimit)
+	{
 		if (!criteria.isEmpty()) {
 			query += " where " + criteria;
 		}
@@ -82,16 +81,12 @@ public class QueryUtil
 		return criteria;
 	}
 
-	public static String handleParamSortOrder(MultivaluedMap<String, String> queryParamsMap, Map<String, String> allowedSortMap, String tableName, List<Error> errorList)
+	public static String handleParamSortOrder(MultivaluedMap<String, String> queryParamsMap, Map<String, String> allowedSortMap, String tableName)
 	{
 		String orderBy = "";
 		if (queryParamsMap.containsKey("sort") && queryParamsMap.containsKey("sort_order")) {
-			if (!allowedSortMap.containsKey(queryParamsMap.get("sort").get(0))) {
-				Error error = new Error();
-				error.setCode(400);
-				error.setMessage("Column " + queryParamsMap.get("sort").get(0) + " was not sortable or unknown");
-				errorList.add(error);
-			} else {
+			if (allowedSortMap.containsKey(queryParamsMap.get("sort").get(0)))
+			{
 				String sortOrder = queryParamsMap.get("sort_order").get(0);
 				String sortCol = allowedSortMap.get(queryParamsMap.get("sort").get(0));
 				sortOrder = sortOrder.toUpperCase();

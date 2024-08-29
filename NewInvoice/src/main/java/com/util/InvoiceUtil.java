@@ -12,7 +12,8 @@ import com.entity.Invoice;
 
 public class InvoiceUtil { 
 
-	public static Response changeInvoiceStatus(int id, String status) {
+	public static Response changeInvoiceStatus(int id, String status) throws Exception
+	{
 		Invoice invoice = Invoice.getInvoice(id);
 		if (invoice == null) {
 			return ResponseUtil.generateResponse(404, "Invoice not found");
@@ -23,10 +24,11 @@ public class InvoiceUtil {
 		if (invoice.changeStatus(status)) {
 			return ResponseUtil.generateResponse(200, "Invoice status changed to " + status);
 		}
-		return ResponseUtil.generateResponse(500, "Error in updating invoice status to " + status);
+		return ResponseUtil.generateResponse(409, "Error in updating invoice status to " + status);
 	}
 
-	public static Response addOrEditInvoice(Invoice invoice, int invoiceId) {
+	public static Response addOrEditInvoice(Invoice invoice, int invoiceId) throws Exception
+	{
 		List<Error> errorList = invoice.validateInvoice();
 		if (!errorList.isEmpty()) {
 			return ResponseUtil.generateResponse(400, "Invalid data", "error", errorList);
@@ -46,16 +48,17 @@ public class InvoiceUtil {
 			int responseCode = isUpdate ? 200 : 201;
 			return ResponseUtil.generateResponse(responseCode, responseStr, Invoice.responseKey, Invoice.getInvoice(invoiceId));
 		}
-		return ResponseUtil.generateResponse(500, "Error in " + ((isUpdate) ? "updating" : "creating") + " invoice");
+		return ResponseUtil.generateResponse(409, "Error in " + ((isUpdate) ? "updating" : "creating") + " invoice");
 	}
 
-	public static Response getInvoices(UriInfo uriInfo) {
+	public static Response getInvoices(UriInfo uriInfo) throws Exception
+	{
 		List<Error> errorList = SecurityUtil.validateRequestParams(uriInfo, Invoice.getAllowedParameters(), Invoice.getAllowedFilterMap(), Invoice.getAllowedSortMap());
 		MultivaluedMap<String, String> queryParamsMap = uriInfo.getQueryParameters();
 
 		String criteria = QueryUtil.handleParamCriteria(queryParamsMap, Invoice.getAllowedFilterMap(), "InvoiceTable");
-		String orderBy = QueryUtil.handleParamSortOrder(queryParamsMap, Invoice.getAllowedSortMap(), "InvoiceTable", errorList);
-		String pageLimit = QueryUtil.handlePagination(queryParamsMap, errorList);
+		String orderBy = QueryUtil.handleParamSortOrder(queryParamsMap, Invoice.getAllowedSortMap(), "InvoiceTable");
+		String pageLimit = QueryUtil.handlePagination(queryParamsMap);
 
 		if (!errorList.isEmpty()) {
 			return ResponseUtil.generateResponse(400, "Invalid request", "error", errorList);
