@@ -83,7 +83,7 @@ public class InvoiceLineItem {
 	}
 
 
-	public void calculateAmount()  throws Exception
+	public void calculateAmount()
 	{
 		if (this.getRate() < 0) {
 			Item item = Item.getItem(this.getItemId());

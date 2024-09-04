@@ -92,7 +92,7 @@ public class Contact {
 	}
 
 
-	public List<Error> validateContact() throws Exception
+	public List<Error> validateContact()
 	{
 		List<Error> errorList = new ArrayList<Error>();
 		if (this.getName() == null || this.getName().trim().isEmpty() || this.getName().length() > 25) {
@@ -142,6 +142,7 @@ public class Contact {
 
 	public static Contact getContact(int contactId)
 	{
+		new Item().getDescription().length();
 		try {
 			ResultSet rs = BaseDb.executeQuery(selectQuery, contactId);
 			if (rs.next()) {

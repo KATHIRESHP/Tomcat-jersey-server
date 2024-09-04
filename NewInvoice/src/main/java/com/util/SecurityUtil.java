@@ -18,7 +18,7 @@ public class SecurityUtil
 		return (value != null) && (!value.isEmpty()) && (value.matches(ALPHA_NUMERIC_PATTERN));
 	}
 
-	public static List<Error> validateRequestParams(UriInfo uriInfo, List<String> allowedParameters, Map<String, String> allowedFilterMap, Map<String, String> allowedSortMap) throws Exception
+	public static List<Error> validateRequestParams(UriInfo uriInfo, List<String> allowedParameters, Map<String, String> allowedFilterMap, Map<String, String> allowedSortMap)
 	{
 		MultivaluedMap<String, String> queryParamsMap = uriInfo.getQueryParameters();
 		List<Error> errorList = new ArrayList<Error>();

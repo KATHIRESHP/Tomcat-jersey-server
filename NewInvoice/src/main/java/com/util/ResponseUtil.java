@@ -5,15 +5,13 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 
 public class ResponseUtil
 {
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
-	public static Response errorResponse()
+	public static Response generateInternalError()
 	{
 		return generateResponse(500, "Something went wrong in our end.");
 	}

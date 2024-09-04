@@ -11,7 +11,7 @@ import com.entity.Item;
 
 public class ItemUtil {
 
-	public static Response addOrEditItem(Item item, int itemId) throws Exception
+	public static Response addOrEditItem(Item item, int itemId)
 	{
 		List<Error> errorList = item.validateItem();
 		if (!errorList.isEmpty()) {
@@ -34,7 +34,7 @@ public class ItemUtil {
 		return ResponseUtil.generateResponse(409, "Error in " + ((isUpdate) ? "updating" : "creating") + " Item");
 	}
 
-	public static Response getItems(UriInfo uriInfo) throws Exception
+	public static Response getItems(UriInfo uriInfo)
 	{
 		List<Error> errorList = SecurityUtil.validateRequestParams(uriInfo, Item.getAllowedParameters(), Item.getAllowedFilterMap(), Item.getAllowedSortMap());
 		MultivaluedMap<String, String> queryParamsMap = uriInfo.getQueryParameters();

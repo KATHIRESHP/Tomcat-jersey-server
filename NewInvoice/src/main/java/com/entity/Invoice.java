@@ -144,7 +144,7 @@ public class Invoice
 		return "Contact id: " + this.getContactId() + " lineItems length: " + this.getLineItems().size();
 	}
 
-	public List<Error> validateInvoice() throws Exception
+	public List<Error> validateInvoice()
 	{
 		List<InvoiceLineItem> invoiceLineItems = this.getLineItems();
 		ArrayList<Integer> itemIdList = new ArrayList<Integer>();
@@ -188,7 +188,7 @@ public class Invoice
 		return errorList;
 	}
 
-	public void calculateInvoice(int invoiceId) throws Exception
+	public void calculateInvoice(int invoiceId)
 	{
 		Map<Integer, InvoiceLineItem> lineItems = new HashMap<Integer, InvoiceLineItem>();
 		int totalAmount = 0;
@@ -247,7 +247,7 @@ public class Invoice
 		return new ArrayList<>();
 	}
 
-	public static List<Invoice> getInvoices(String criteria, String orderBy, String pageLimit) throws Exception
+	public static List<Invoice> getInvoices(String criteria, String orderBy, String pageLimit)
 	{
 		String query = selectAllQuery;
 		query = QueryUtil.appendCriOrderLimit(query, criteria, orderBy, pageLimit);
@@ -309,7 +309,7 @@ public class Invoice
 		return null;
 	}
 
-	public boolean create() throws Exception
+	public boolean create()
 	{
 		this.setInvoiceId();
 		if(BaseDb.executeUpdate(insertQuery, this.invoiceId, this.getContactId(), this.getTotal()))

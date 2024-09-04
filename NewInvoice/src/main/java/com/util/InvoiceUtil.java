@@ -12,7 +12,7 @@ import com.entity.Invoice;
 
 public class InvoiceUtil { 
 
-	public static Response changeInvoiceStatus(int id, String status) throws Exception
+	public static Response changeInvoiceStatus(int id, String status)
 	{
 		Invoice invoice = Invoice.getInvoice(id);
 		if (invoice == null) {
@@ -27,7 +27,7 @@ public class InvoiceUtil {
 		return ResponseUtil.generateResponse(409, "Error in updating invoice status to " + status);
 	}
 
-	public static Response addOrEditInvoice(Invoice invoice, int invoiceId) throws Exception
+	public static Response addOrEditInvoice(Invoice invoice, int invoiceId)
 	{
 		List<Error> errorList = invoice.validateInvoice();
 		if (!errorList.isEmpty()) {
@@ -51,7 +51,7 @@ public class InvoiceUtil {
 		return ResponseUtil.generateResponse(409, "Error in " + ((isUpdate) ? "updating" : "creating") + " invoice");
 	}
 
-	public static Response getInvoices(UriInfo uriInfo) throws Exception
+	public static Response getInvoices(UriInfo uriInfo)
 	{
 		List<Error> errorList = SecurityUtil.validateRequestParams(uriInfo, Invoice.getAllowedParameters(), Invoice.getAllowedFilterMap(), Invoice.getAllowedSortMap());
 		MultivaluedMap<String, String> queryParamsMap = uriInfo.getQueryParameters();

@@ -12,7 +12,7 @@ import com.entity.Error;
 public class ContactUtil {
 
 
-	public static Response addOrEditContact(Contact contact, int contactId) throws Exception
+	public static Response addOrEditContact(Contact contact, int contactId)
 	{
 		List<Error> errorList = contact.validateContact();
 		if(!errorList.isEmpty()) {
@@ -35,7 +35,7 @@ public class ContactUtil {
 		return ResponseUtil.generateResponse(409, "Error in " + ((isUpdate) ? "updating" : "creating") + " contact");
 	}
 
-	public static Response getContacts(UriInfo uriInfo) throws Exception
+	public static Response getContacts(UriInfo uriInfo)
 	{
 		List<Error> errorList = SecurityUtil.validateRequestParams(uriInfo, Contact.getAllowedParameters(), Contact.getAllowedFilterMap(), Contact.getAllowedSortMap());
 		MultivaluedMap<String, String> queryParamsMap = uriInfo.getQueryParameters();
